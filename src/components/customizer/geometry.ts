@@ -469,8 +469,11 @@ export interface DecalPlacement {
 
 /**
  * Posição e orientação de uma arte na superfície.
- * Segue a mesma convenção do <Decal> da drei (lookAt na normal, depois giro de 180° em Z e Y),
- * mas com a normal calculada da própria superfície e um "para cima" que faz sentido em cada parte.
+ *
+ * Monta uma base ortonormal (right, correctedUp, normal) para que o texto fique
+ * sempre legível: "right" aponta para a direita de quem lê, "correctedUp" para
+ * cima, e "normal" sai da superfície. A rotação Euler resultante é passada
+ * diretamente ao <Decal> da drei, que a usa sem modificação.
  */
 export function placeDecal(
   model: CapModelSpec,
@@ -501,17 +504,49 @@ export function placeDecal(
     depth = Math.max(0.45, size * 0.6);
   }
 
-  const orienter = new THREE.Object3D();
-  orienter.up.copy(up);
-  orienter.position.copy(frame.position);
-  orienter.lookAt(frame.position.clone().add(frame.normal));
-  orienter.rotateZ(Math.PI);
-  orienter.rotateY(Math.PI);
-  orienter.rotateZ(THREE.MathUtils.degToRad(-rotationDeg));
+  // --- Monta uma base ortonormal a partir da normal e do "para cima" desejado ---
+  //
+  // Convenção do DecalGeometry (three-stdlib):
+  //   UV = (0.5 + x/size.x,  0.5 + y/size.y)
+  // onde (x, y) são coordenadas no espaço local do projetor.
+  // Para que o texto apareça legível, o eixo X local precisa apontar para a
+  // DIREITA do leitor, e o eixo Y local precisa apontar para BAIXO (já que V
+  // cresce para baixo como coordenadas de canvas, onde Y=0 é o topo).
+  //
+  // A convenção original do <Decal> da drei (lookAt + rotateZ(π) + rotateY(π))
+  // produz exatamente isso: X = right, Y = -up, Z = +normal.
+  // Reproduzimos o mesmo resultado via base ortonormal explícita.
+
+  const normal = frame.normal.clone().normalize();
+
+  // tangentRight = up × normal  (aponta para a direita de quem lê o texto)
+  const tangentRight = new THREE.Vector3().crossVectors(up, normal);
+
+  // Se up e normal forem quase paralelos, usa um fallback para evitar vetor nulo
+  if (tangentRight.lengthSq() < 1e-6) {
+    const fallback = Math.abs(up.x) < 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1);
+    tangentRight.crossVectors(fallback, normal);
+  }
+  tangentRight.normalize();
+
+  // tangentDown = normal × tangentRight  (aponta para BAIXO no espaço da textura)
+  // É o oposto do "para cima" corrigido; isso casa com a convenção de UV do DecalGeometry.
+  const tangentDown = new THREE.Vector3().crossVectors(normal, tangentRight).negate();
+
+  // Matriz de rotação: colunas = (tangentRight, tangentDown, normal)
+  const matrix = new THREE.Matrix4().makeBasis(tangentRight, tangentDown, normal);
+
+  // Aplica a rotação do usuário em torno da normal (eixo Z local)
+  if (rotationDeg !== 0) {
+    const spin = new THREE.Matrix4().makeRotationAxis(normal, THREE.MathUtils.degToRad(-rotationDeg));
+    matrix.premultiply(spin);
+  }
+
+  const euler = new THREE.Euler().setFromRotationMatrix(matrix);
 
   return {
     position: [frame.position.x, frame.position.y, frame.position.z],
-    rotation: [orienter.rotation.x, orienter.rotation.y, orienter.rotation.z],
+    rotation: [euler.x, euler.y, euler.z],
     depth,
   };
 }
