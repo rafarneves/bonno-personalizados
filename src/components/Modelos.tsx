@@ -162,8 +162,12 @@ export default function Modelos() {
         </AnimatedSection>
 
         <AnimatedSection animation="fadeInUp" delay={0.3}>
-          <div className="mt-6 flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-center">
+          <div className="mt-6 flex flex-col flex-wrap items-center gap-4 text-center sm:flex-row sm:justify-center">
             <CtaButton>Solicitar um orçamento</CtaButton>
+            {/* Link comum de propósito: não pré-carrega o 3D na página inicial */}
+            <CtaButton href="/personalizar" variant="outline-light" icon="arrow">
+              Monte o seu em 3D
+            </CtaButton>
             <p className="text-sm text-ink-400">
               Não achou o que procurava? A gente encontra pra você.
             </p>

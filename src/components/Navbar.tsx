@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Box, Menu, X } from 'lucide-react';
 import Logo from './Logo';
 import CtaButton from './CtaButton';
 import { WhatsappIcon } from './icons';
@@ -13,6 +13,8 @@ type Pill = PillBox & { animate: boolean };
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
 // Mesmo breakpoint do `lg:` do Tailwind, a partir do qual o menu desktop aparece
 const DESKTOP_QUERY = '(min-width: 64rem)';
+// Link comum (sem next/link) de propósito: evita que a página inicial pré-carregue o 3D
+const CUSTOMIZER_HREF = '/personalizar';
 
 function measure(link: HTMLElement): PillBox {
   return {
@@ -181,6 +183,18 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2">
+            <a
+              href={CUSTOMIZER_HREF}
+              className={`hidden items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition-colors xl:inline-flex ${
+                solid
+                  ? 'bg-brand-50 text-brand-700 hover:bg-brand-100'
+                  : 'bg-white/10 text-white hover:bg-white/20'
+              }`}
+            >
+              <Box className="size-4" />
+              Crie seu boné 3D
+            </a>
+
             {/* O wrapper controla a visibilidade: o `inline-flex` do próprio botão
                 venceria um `hidden` aplicado nele mesmo. */}
             <span className="hidden sm:block">
@@ -249,6 +263,9 @@ export default function Navbar() {
             }`}
             style={{ transitionDelay: menuEntered ? '0.42s' : '0s' }}
           >
+            <CtaButton href={CUSTOMIZER_HREF} variant="outline-light" icon="arrow" className="w-full">
+              Crie seu boné em 3D
+            </CtaButton>
             <CtaButton className="w-full">Solicitar orçamento</CtaButton>
             <a
               href={whatsappLink()}
