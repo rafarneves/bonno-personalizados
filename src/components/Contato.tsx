@@ -1,79 +1,128 @@
-import Image from 'next/image';
 import { MapPin, Phone } from 'lucide-react';
+import Logo from './Logo';
+import CtaButton from './CtaButton';
 import AnimatedSection from './AnimatedSection';
+import { InstagramIcon, WhatsappIcon } from './icons';
+import { navLinks, site, whatsappLink } from '@/lib/site';
+
+const fullAddress = `${site.address.street}, ${site.address.district}, ${site.address.city}/${site.address.state}, ${site.address.zip}`;
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
 
 export default function Contato() {
   return (
-    <footer id="contato" className="bg-gray-50 pt-16 pb-8 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center mb-12">
-          
-          {/* Logo */}
-          <div className="flex justify-center md:justify-start">
-            <AnimatedSection animation="fadeInLeft" delay={0.1}>
-              <Image
-                src="/images/Logo-3.png"
-                alt="Bonno Personalizados"
-                width={200}
-                height={80}
-                className="h-16 md:h-20 w-auto"
-                style={{ width: 'auto' }}
-              />
-            </AnimatedSection>
-          </div>
+    <footer id="contato" className="grain relative overflow-hidden bg-ink-950 pt-20">
+      <div className="bg-grid absolute inset-0 opacity-60" />
+      <div className="absolute -left-40 top-0 size-96 rounded-full bg-brand-600/20 blur-[130px]" />
 
-          {/* Address */}
-          <div className="flex justify-center md:justify-start">
-            <AnimatedSection animation="fadeInLeft" delay={0.2}>
-              <div className="flex items-start space-x-4">
-                <MapPin className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
-                <p className="text-gray-600 leading-relaxed">
-                  Rua Lúcia Viveiros, 255, Neópolis,<br />
-                  Natal/RN<br />
-                  CEP: 59.086-005
-                </p>
-              </div>
-            </AnimatedSection>
-          </div>
-
-          {/* Contact Info */}
-          <div className="flex justify-center md:justify-start">
-            <AnimatedSection animation="fadeInLeft" delay={0.3}>
-              <div className="space-y-4">
-                <a 
-                  href="https://wa.me/5584998271330" 
-                  target="_blank" 
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <AnimatedSection animation="fadeInUp">
+          <div className="grid gap-12 pb-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1.2fr]">
+            {/* Marca */}
+            <div>
+              <Logo tone="dark" />
+              <p className="mt-6 max-w-sm text-sm leading-relaxed text-ink-400">
+                Bonés personalizados sob encomenda para empresas, eventos, times e
+                formaturas. Da criação do layout à entrega, com acompanhamento de um
+                consultor.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <a
+                  href={whatsappLink()}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-4 text-gray-600 hover:text-blue-600 transition-colors"
+                  aria-label="WhatsApp da Bonno Personalizados"
+                  className="flex size-11 items-center justify-center rounded-full border border-white/10 text-white transition-all hover:border-brand-400 hover:bg-brand-600"
                 >
-                  <Phone className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                  <span className="font-medium">(84) 99827-1330</span>
+                  <WhatsappIcon className="size-5" />
                 </a>
-                
-                <a 
-                  href="https://www.instagram.com/bonno_personalizados" 
-                  target="_blank" 
+                <a
+                  href={site.instagram}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-4 text-gray-600 hover:text-blue-600 transition-colors"
+                  aria-label="Instagram da Bonno Personalizados"
+                  className="flex size-11 items-center justify-center rounded-full border border-white/10 text-white transition-all hover:border-brand-400 hover:bg-brand-600"
                 >
-                  <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-blue-600 flex-shrink-0">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                  </svg>
-                  <span className="font-medium">@bonno_personalizados</span>
+                  <InstagramIcon className="size-5" />
                 </a>
               </div>
-            </AnimatedSection>
+            </div>
+
+            {/* Navegação */}
+            <nav aria-label="Rodapé">
+              <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-white">
+                Navegação
+              </h2>
+              <ul className="mt-6 space-y-3">
+                {navLinks.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      className="text-sm text-ink-400 transition-colors hover:text-brand-300"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* Contato */}
+            <div>
+              <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-white">
+                Contato
+              </h2>
+              <ul className="mt-6 space-y-5">
+                <li>
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-start gap-4 text-sm leading-relaxed text-ink-400 transition-colors hover:text-white"
+                  >
+                    <MapPin className="mt-0.5 size-5 shrink-0 text-brand-400" />
+                    <span>
+                      {site.address.street}, {site.address.district}
+                      <br />
+                      {site.address.city}/{site.address.state} · CEP {site.address.zip}
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={whatsappLink()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 text-sm font-medium text-ink-300 transition-colors hover:text-white"
+                  >
+                    <Phone className="size-5 shrink-0 text-brand-400" />
+                    {site.phoneDisplay}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={site.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 text-sm font-medium text-ink-300 transition-colors hover:text-white"
+                  >
+                    <InstagramIcon className="size-5 shrink-0 text-brand-400" />
+                    {site.instagramHandle}
+                  </a>
+                </li>
+              </ul>
+
+              <div className="mt-8">
+                <CtaButton size="md">Solicitar orçamento</CtaButton>
+              </div>
+            </div>
           </div>
+        </AnimatedSection>
 
-        </div>
-
-        {/* Copyright */}
-        <div className="text-center pt-8 border-t border-gray-200">
-          <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Bonno Personalizados - Desenvolvido por Rafael Neves
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 py-8 text-center text-xs text-ink-500 sm:flex-row sm:text-left">
+          <p>
+            © {new Date().getFullYear()} {site.name}. Todos os direitos reservados.
           </p>
+          <p>Desenvolvido por Rafael Neves</p>
         </div>
       </div>
     </footer>

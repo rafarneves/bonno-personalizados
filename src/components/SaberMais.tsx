@@ -1,90 +1,108 @@
 import Image from 'next/image';
-import { Calendar, Truck, ShoppingCart, CreditCard } from 'lucide-react';
+import { CalendarDays, CreditCard, Package, Truck } from 'lucide-react';
 import AnimatedSection from './AnimatedSection';
+import SectionHeading from './SectionHeading';
+import CtaButton from './CtaButton';
+import { site } from '@/lib/site';
+
+const items = [
+  {
+    icon: CalendarDays,
+    label: 'Fabricação',
+    value: `${site.productionDays} dias úteis`,
+    text: 'Contados a partir da aprovação do layout.',
+  },
+  {
+    icon: Truck,
+    label: 'Entrega',
+    value: `${site.shippingDays} dias úteis`,
+    text: 'O pedido sai daqui direto para o seu endereço.',
+  },
+  {
+    icon: Package,
+    label: 'Pedido mínimo',
+    value: `${site.minOrder} unidades`,
+    text: 'Quanto maior a quantidade, melhor o valor por peça.',
+  },
+  {
+    icon: CreditCard,
+    label: 'Pagamento',
+    value: 'Pix, boleto ou cartão',
+    text: 'Você escolhe a forma que ficar melhor.',
+  },
+];
 
 export default function SaberMais() {
-  const items = [
-    {
-      icon: <Calendar className="w-8 h-8 text-blue-600" />,
-      text: 'Nosso prazo de fabricação é de 20 dias úteis',
-    },
-    {
-      icon: <Truck className="w-8 h-8 text-blue-600" />,
-      text: 'Nosso prazo de entrega é de 7 dias úteis',
-    },
-    {
-      icon: <ShoppingCart className="w-8 h-8 text-blue-600" />,
-      text: 'Pedido mínimo: 30 unidades',
-    },
-    {
-      icon: <CreditCard className="w-8 h-8 text-blue-600" />,
-      text: 'Aceitamos pagamentos via pix, boleto e cartão',
-    },
-  ];
-
   return (
-    <section id="saber-mais" className="py-16 md:py-24 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center gap-12">
-          {/* Left Image */}
-          <div className="flex-1 w-full max-w-sm md:max-w-md mx-auto">
-            <AnimatedSection animation="fadeInUp" delay={0.2} className="w-full">
-              <div className="relative w-full aspect-[3/4]">
+    <section id="saber-mais" className="relative overflow-hidden bg-ink-50 py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-14 lg:grid-cols-[0.85fr_1fr] lg:gap-16">
+          {/* Painel azul com o recorte */}
+          <AnimatedSection animation="fadeInLeft">
+            <div className="relative mx-auto max-w-sm lg:max-w-none">
+              <div className="grain relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-ink-950 px-6 pt-10">
+                <div className="bg-grid absolute inset-0 opacity-60" />
+                <div className="absolute -left-16 -top-16 size-56 rounded-full bg-brand-400/30 blur-3xl" />
                 <Image
                   src="/images/homem-segurando-celular.png"
-                  alt="Homem segurando celular"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-contain"
+                  alt="Pessoa consultando o orçamento de bonés pelo celular"
+                  width={826}
+                  height={1123}
+                  sizes="(max-width: 1024px) 80vw, 36vw"
+                  className="relative mx-auto h-auto w-full max-w-xs object-contain drop-shadow-2xl"
                 />
               </div>
-            </AnimatedSection>
-          </div>
 
-          {/* Right Content */}
-          <div className="flex-1 w-full">
-            <AnimatedSection animation="fadeInRight" delay={0.3}>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-10 relative inline-block">
-                <span className="relative z-10">O que preciso saber?</span>
-                {/* Zigzag underline */}
-                <svg
-                  className="absolute -bottom-1 left-0 w-full h-4 text-blue-600"
-                  viewBox="0 0 500 150"
-                  preserveAspectRatio="none"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  strokeLinecap="round"
+              <div className="absolute -right-4 top-8 rotate-3 rounded-2xl bg-white px-4 py-3 shadow-card-hover">
+                <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-ink-400">
+                  Atendimento
+                </p>
+                <p className="font-display text-base font-bold text-ink-950">
+                  Direto no WhatsApp
+                </p>
+              </div>
+            </div>
+          </AnimatedSection>
+
+          {/* Conteúdo */}
+          <div>
+            <AnimatedSection animation="fadeInRight">
+              <SectionHeading
+                align="left"
+                eyebrow="Antes de pedir"
+                title="O que preciso"
+                highlight="saber?"
+                description="Tudo o que costuma ser perguntado antes de fechar o pedido, sem letras miúdas."
+                className="max-w-xl"
+              />
+            </AnimatedSection>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-2">
+              {items.map((item, index) => (
+                <AnimatedSection
+                  key={item.label}
+                  animation="fadeInUp"
+                  delay={0.08 * index}
                 >
-                  <path d="M.58,16s93-15.56,303-12c118,2,180,12,180,12"></path>
-                  <path d="M29.83,33.28S111.54,17.1,296.13,20.8c103.71,2.08,158.2,12.48,158.2,12.48"></path>
-                </svg>
-              </h2>
-            </AnimatedSection>
+                  <div className="group h-full rounded-2xl border border-ink-100 bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-card-hover">
+                    <span className="inline-flex size-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition-colors duration-300 group-hover:bg-brand-600 group-hover:text-white">
+                      <item.icon className="size-5" />
+                    </span>
+                    <p className="mt-5 text-[0.7rem] font-semibold uppercase tracking-widest text-ink-400">
+                      {item.label}
+                    </p>
+                    <p className="mt-1 font-display text-xl font-bold text-ink-950">
+                      {item.value}
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-ink-500">{item.text}</p>
+                  </div>
+                </AnimatedSection>
+              ))}
+            </div>
 
-            <AnimatedSection animation="fadeInRight" delay={0.4}>
-              <ul className="space-y-8 mb-12">
-                {items.map((item, index) => (
-                  <li key={index} className="flex items-center space-x-6">
-                    <div className="flex-shrink-0 bg-blue-50 p-4 rounded-full">
-                      {item.icon}
-                    </div>
-                    <span className="text-xl text-gray-700 font-medium">{item.text}</span>
-                  </li>
-                ))}
-              </ul>
-            </AnimatedSection>
-
-            <AnimatedSection animation="fadeInRight" delay={0.5}>
-              <div className="text-center md:text-left">
-                <a
-                  href="https://wa.me/message/RYCRUU3DJLS2P1"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block bg-blue-600 text-white font-bold text-lg px-8 py-4 rounded-full hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                >
-                  Solicitar um orçamento
-                </a>
+            <AnimatedSection animation="fadeInUp" delay={0.4}>
+              <div className="mt-10">
+                <CtaButton>Tirar dúvidas no WhatsApp</CtaButton>
               </div>
             </AnimatedSection>
           </div>

@@ -2,6 +2,58 @@
 
 @theme inline {
   --font-sans: var(--font-inter);
+  --font-display: var(--font-outfit);
+}
+
+@theme {
+  /* Azul elétrico da marca — amostrado do logotipo (#0507EF) */
+  --color-brand-50: #edeeff;
+  --color-brand-100: #dee0ff;
+  --color-brand-200: #c3c5ff;
+  --color-brand-300: #9e9dff;
+  --color-brand-400: #7b72ff;
+  --color-brand-500: #5b47ff;
+  --color-brand-600: #0507ef;
+  --color-brand-700: #0405c4;
+  --color-brand-800: #06099e;
+  --color-brand-900: #0a0d7c;
+  --color-brand-950: #05064a;
+
+  /* Neutros levemente azulados, para conversar com a marca */
+  --color-ink-50: #f6f7fb;
+  --color-ink-100: #eceef6;
+  --color-ink-200: #d8dbe9;
+  --color-ink-300: #b4bad0;
+  --color-ink-400: #8890ad;
+  --color-ink-500: #656d8c;
+  --color-ink-600: #4c5370;
+  --color-ink-700: #3b4159;
+  --color-ink-800: #23273a;
+  --color-ink-900: #101223;
+  --color-ink-950: #06070f;
+
+  --shadow-glow: 0 20px 70px -20px rgb(5 7 239 / 0.55);
+  --shadow-card: 0 1px 2px rgb(6 7 15 / 0.04), 0 12px 32px -12px rgb(6 7 15 / 0.12);
+  --shadow-card-hover: 0 2px 4px rgb(6 7 15 / 0.05), 0 28px 56px -20px rgb(6 7 15 / 0.22);
+
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-shine: shine 2.6s ease-in-out infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes shine {
+  0% { transform: translateX(-120%); }
+  60%, 100% { transform: translateX(220%); }
 }
 
 html {
@@ -10,7 +62,111 @@ html {
 
 body {
   background-color: #ffffff;
-  color: #1a202c;
+  color: var(--color-ink-900);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Compensa a navbar fixa quando o usuário navega pelas âncoras */
+[id] {
+  scroll-margin-top: 6rem;
+}
+
+::selection {
+  background-color: var(--color-brand-600);
+  color: #fff;
+}
+
+/* Trilho de rolagem discreto, no tom da marca */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--color-ink-100); }
+::-webkit-scrollbar-thumb { background: var(--color-ink-300); border-radius: 999px; border: 2px solid var(--color-ink-100); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-brand-600); }
+
+/* ---------- Texturas de fundo ---------- */
+
+/* Malha quadriculada sutil para as seções escuras */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* A mesma malha, em azul, para as seções claras */
+.bg-grid-light {
+  background-image:
+    linear-gradient(to right, rgb(5 7 239 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(5 7 239 / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Granulação por cima das seções escuras: tira o aspecto "chapado" do gradiente */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Esmaece a borda de um elemento decorativo até sumir */
+.mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* ---------- Carrosséis (Swiper) ---------- */
+
+.bonno-swiper .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  opacity: 0.25;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.bonno-swiper .swiper-pagination-bullet-active {
+  width: 30px;
+  border-radius: 999px;
+  opacity: 1;
+}
+
+.bonno-swiper .swiper-slide {
+  height: auto;
+}
+
+/* ---------- Acessibilidade ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Revelação sem JavaScript ----------
+   Usada acima da dobra: o conteúdo aparece mesmo que o JS não carregue,
+   e a regra de prefers-reduced-motion acima já a neutraliza. */
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes reveal-right {
+  from { opacity: 0; transform: translateX(32px); }
+  to { opacity: 1; transform: none; }
+}
+
+.reveal-up {
+  animation: reveal-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.reveal-right {
+  animation: reveal-right 0.95s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
