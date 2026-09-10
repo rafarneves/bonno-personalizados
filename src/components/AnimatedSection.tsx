@@ -1,7 +1,4 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 type AnimationType =
   | 'fadeIn'
@@ -19,33 +16,11 @@ interface AnimatedSectionProps {
   className?: string;
 }
 
-const variants = {
-  fadeIn: {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  },
-  fadeInUp: {
-    hidden: { opacity: 0, y: 32 },
-    visible: { opacity: 1, y: 0 },
-  },
-  fadeInDown: {
-    hidden: { opacity: 0, y: -32 },
-    visible: { opacity: 1, y: 0 },
-  },
-  fadeInLeft: {
-    hidden: { opacity: 0, x: -32 },
-    visible: { opacity: 1, x: 0 },
-  },
-  fadeInRight: {
-    hidden: { opacity: 0, x: 32 },
-    visible: { opacity: 1, x: 0 },
-  },
-  zoomIn: {
-    hidden: { opacity: 0, scale: 0.94 },
-    visible: { opacity: 1, scale: 1 },
-  },
-};
-
+/**
+ * Entrada suave ao rolar a página, feita só com CSS (veja `[data-reveal]` no globals.css).
+ * O componente apenas marca o elemento; quem dispara a animação é o RevealObserver —
+ * um único observador para a página inteira, sem biblioteca de animação no bundle.
+ */
 export default function AnimatedSection({
   children,
   animation = 'fadeInUp',
@@ -53,16 +28,14 @@ export default function AnimatedSection({
   duration = 0.7,
   className = '',
 }: AnimatedSectionProps) {
+  const style = {
+    '--reveal-delay': `${delay}s`,
+    '--reveal-duration': `${duration}s`,
+  } as CSSProperties;
+
   return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration, delay, ease: [0.22, 1, 0.36, 1] }}
-      variants={variants[animation]}
-      className={className}
-    >
+    <div data-reveal={animation} className={className} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 }

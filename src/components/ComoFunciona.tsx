@@ -48,7 +48,8 @@ export default function ComoFunciona() {
                   src="/images/WhatsApp-Image-2024-12-03-at-14.28.25-1.jpeg"
                   alt="Bonés personalizados produzidos pela Bonno"
                   fill
-                  sizes="(max-width: 1024px) 90vw, 45vw"
+                  // Largura real do card: max-w-sm (384px) até o lg, max-w-md (448px) depois
+                  sizes="(max-width: 1024px) 384px, 448px"
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink-950/50 via-transparent to-transparent" />

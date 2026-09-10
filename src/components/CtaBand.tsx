@@ -10,8 +10,8 @@ export default function CtaBand() {
         <AnimatedSection animation="zoomIn">
           <div className="grain relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-ink-950 px-6 py-14 sm:px-12 md:py-20">
             <div className="bg-grid absolute inset-0 opacity-50" />
-            <div className="absolute -left-20 -top-24 size-80 rounded-full bg-brand-400/30 blur-[100px]" />
-            <div className="absolute -bottom-32 right-0 size-80 rounded-full bg-brand-300/20 blur-[110px]" />
+            <div className="glow absolute -left-20 -top-24 size-80 text-brand-400/25 [--glow-spread:9rem]" />
+            <div className="glow absolute -bottom-32 right-0 size-80 text-brand-300/16 [--glow-spread:10rem]" />
 
             {/* Marca d'água com o ícone da marca */}
             <Image

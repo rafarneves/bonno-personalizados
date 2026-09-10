@@ -9,6 +9,7 @@ import Faq from '@/components/Faq';
 import CtaBand from '@/components/CtaBand';
 import Contato from '@/components/Contato';
 import WhatsappFloat from '@/components/WhatsappFloat';
+import RevealObserver from '@/components/RevealObserver';
 import { faq } from '@/lib/faq';
 import { site } from '@/lib/site';
 
@@ -72,6 +73,7 @@ export default function Home() {
       </main>
       <Contato />
       <WhatsappFloat />
+      <RevealObserver />
     </>
   );
 }

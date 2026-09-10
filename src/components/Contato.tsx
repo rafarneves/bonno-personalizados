@@ -12,7 +12,7 @@ export default function Contato() {
   return (
     <footer id="contato" className="grain relative overflow-hidden bg-ink-950 pt-20">
       <div className="bg-grid absolute inset-0 opacity-60" />
-      <div className="absolute -left-40 top-0 size-96 rounded-full bg-brand-600/20 blur-[130px]" />
+      <div className="glow absolute -left-40 top-0 size-96 text-brand-600/16 [--glow-spread:12rem]" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <AnimatedSection animation="fadeInUp">

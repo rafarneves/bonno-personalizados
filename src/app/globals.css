@@ -101,15 +101,34 @@ body {
   background-size: 64px 64px;
 }
 
-/* Granulação por cima das seções escuras: tira o aspecto "chapado" do gradiente */
-.grain::after {
+/* Granulação por cima das seções escuras: tira o aspecto "chapado" do gradiente.
+   Só em telas grandes — no celular ela é imperceptível, e o mix-blend-mode obriga
+   o navegador a recompor a seção inteira enquanto a página rola. */
+@media (min-width: 64rem) {
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Brilho difuso da marca. Faz o papel de um círculo com `blur` enorme, mas é só um
+   degradê: o celular não precisa calcular filtro nenhum para desenhá-lo.
+   A cor vem de uma classe `text-*` e o alcance do brilho, de --glow-spread. */
+.glow {
+  pointer-events: none;
+}
+
+.glow::before {
   content: '';
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.35;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  inset: calc(var(--glow-spread, 0px) * -1);
+  /* A dica de interpolação em 35% imita a queda suave de um desfoque gaussiano */
+  background: radial-gradient(closest-side, currentColor, 35%, transparent);
 }
 
 /* Dissolve a borda de cima de uma imagem, para ela não terminar em linha reta */
@@ -147,6 +166,11 @@ body {
     animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 
@@ -170,4 +194,28 @@ body {
 
 .reveal-right {
   animation: reveal-right 0.95s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- Revelação ao rolar (AnimatedSection + RevealObserver) ----------
+   O conteúdo só é escondido quando há JavaScript para revelá-lo depois;
+   sem JS (ou em navegadores antigos) ele simplesmente aparece. */
+
+@media (scripting: enabled) {
+  [data-reveal] {
+    opacity: 0;
+    transition:
+      opacity var(--reveal-duration, 0.7s) cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s),
+      transform var(--reveal-duration, 0.7s) cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s);
+  }
+
+  [data-reveal='fadeInUp'] { transform: translateY(32px); }
+  [data-reveal='fadeInDown'] { transform: translateY(-32px); }
+  [data-reveal='fadeInLeft'] { transform: translateX(-32px); }
+  [data-reveal='fadeInRight'] { transform: translateX(32px); }
+  [data-reveal='zoomIn'] { transform: scale(0.94); }
+
+  [data-reveal][data-revealed] {
+    opacity: 1;
+    transform: none;
+  }
 }

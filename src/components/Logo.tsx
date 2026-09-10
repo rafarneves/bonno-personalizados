@@ -14,12 +14,13 @@ export default function Logo({ tone = 'light', className = '' }: LogoProps) {
       <Image
         src="/images/icone-bonno-300x300.png"
         alt=""
-        width={300}
-        height={300}
+        // Tamanho real na tela (no máximo 40px). Com 300, o navegador baixava a versão de 640px.
+        width={40}
+        height={40}
         className={`size-9 w-auto shrink-0 transition-[filter] duration-300 sm:size-10 ${
           isDark ? 'brightness-0 invert' : ''
         }`}
-        priority
+        loading="eager"
       />
       <span className="flex flex-col leading-none">
         <span

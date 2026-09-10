@@ -34,7 +34,7 @@ export default function Marquee() {
       <p className="sr-only">
         A Bonno produz bonés personalizados para {words.join(', ')}.
       </p>
-      <div className="flex w-max items-center animate-marquee">
+      <div className="flex w-max items-center animate-marquee will-change-transform">
         <Track />
         <Track />
       </div>

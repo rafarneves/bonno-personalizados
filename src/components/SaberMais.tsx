@@ -42,13 +42,14 @@ export default function SaberMais() {
             <div className="relative mx-auto max-w-sm lg:max-w-none">
               <div className="grain relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-ink-950 px-6 pt-10">
                 <div className="bg-grid absolute inset-0 opacity-60" />
-                <div className="absolute -left-16 -top-16 size-56 rounded-full bg-brand-400/30 blur-3xl" />
+                <div className="glow absolute -left-16 -top-16 size-56 text-brand-400/25 [--glow-spread:6rem]" />
                 <Image
                   src="/images/homem-segurando-celular.png"
                   alt="Pessoa consultando o orçamento de bonés pelo celular"
                   width={826}
                   height={1123}
-                  sizes="(max-width: 1024px) 80vw, 36vw"
+                  // A imagem nunca passa de max-w-xs (320px), em qualquer tela
+                  sizes="320px"
                   className="relative mx-auto h-auto w-full max-w-xs object-contain drop-shadow-2xl"
                 />
               </div>

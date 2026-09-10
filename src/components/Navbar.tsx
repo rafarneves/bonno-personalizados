@@ -1,17 +1,38 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import Logo from './Logo';
 import CtaButton from './CtaButton';
 import { WhatsappIcon } from './icons';
 import { navLinks, site, whatsappLink } from '@/lib/site';
 
+type PillBox = { x: number; y: number; width: number; height: number };
+type Pill = PillBox & { animate: boolean };
+
+const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+// Mesmo breakpoint do `lg:` do Tailwind, a partir do qual o menu desktop aparece
+const DESKTOP_QUERY = '(min-width: 64rem)';
+
+function measure(link: HTMLElement): PillBox {
+  return {
+    x: link.offsetLeft,
+    y: link.offsetTop,
+    width: link.offsetWidth,
+    height: link.offsetHeight,
+  };
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  // Entrada escalonada dos itens do menu mobile. Só volta a `false` depois que o
+  // menu termina de sumir, para a saída continuar sendo apenas o fade.
+  const [menuEntered, setMenuEntered] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState<string>('principal');
+  const [pill, setPill] = useState<Pill | null>(null);
+  const linkRefs = useRef(new Map<string, HTMLAnchorElement>());
+  const activeRef = useRef(active);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 24);
@@ -41,6 +62,34 @@ export default function Navbar() {
     return () => observer.disconnect();
   }, []);
 
+  // Desliza o destaque do menu desktop até o link da seção ativa
+  useEffect(() => {
+    activeRef.current = active;
+    // No celular esse menu nem aparece. Medir os links ali forçaria o navegador
+    // a recalcular o layout da página inteira durante a carga.
+    if (!window.matchMedia(DESKTOP_QUERY).matches) return;
+    const frame = requestAnimationFrame(() => {
+      const link = linkRefs.current.get(active);
+      if (!link) return;
+      setPill((prev) => ({ ...measure(link), animate: prev !== null }));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [active]);
+
+  // Recalcula sem animação quando a tela muda de tamanho ou a fonte termina de carregar
+  useEffect(() => {
+    const desktop = window.matchMedia(DESKTOP_QUERY);
+    const remeasure = () => {
+      if (!desktop.matches) return;
+      const link = linkRefs.current.get(activeRef.current);
+      if (!link) return;
+      setPill({ ...measure(link), animate: false });
+    };
+    document.fonts.ready.then(remeasure);
+    window.addEventListener('resize', remeasure);
+    return () => window.removeEventListener('resize', remeasure);
+  }, []);
+
   // Trava a rolagem do fundo enquanto o menu mobile está aberto
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -49,6 +98,15 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
+  const toggleMenu = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      return;
+    }
+    setMenuEntered(true);
+    setIsOpen(true);
+  };
+
   const solid = scrolled || isOpen;
 
   return (
@@ -56,7 +114,8 @@ export default function Navbar() {
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           solid
-            ? 'border-b border-ink-100 bg-white/85 py-2 shadow-[0_8px_30px_-12px_rgb(6_7_15_/_0.15)] backdrop-blur-xl'
+            ? // O desfoque de fundo só no desktop: no celular ele é recalculado a cada quadro de rolagem
+              'border-b border-ink-100 bg-white/95 py-2 shadow-[0_8px_30px_-12px_rgb(6_7_15_/_0.15)] lg:bg-white/85 lg:backdrop-blur-xl'
             : 'border-b border-transparent py-4'
         }`}
       >
@@ -70,53 +129,69 @@ export default function Navbar() {
           </a>
 
           {/* Menu desktop */}
-          <ul className="hidden items-center gap-1 lg:flex">
-            {navLinks.map((link) => {
-              const id = link.href.slice(1);
-              const isActive = active === id;
-              return (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    aria-current={isActive ? 'true' : undefined}
-                    className={`relative rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-                      solid
-                        ? isActive
-                          ? 'text-brand-600'
-                          : 'text-ink-600 hover:text-ink-950'
-                        : isActive
-                          ? 'text-white'
-                          : 'text-white/65 hover:text-white'
-                    }`}
-                  >
-                    {isActive && (
-                      <motion.span
-                        layoutId="nav-pill"
-                        className={`absolute inset-0 -z-10 rounded-full ${
-                          solid ? 'bg-brand-50' : 'bg-white/10'
-                        }`}
-                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                      />
-                    )}
-                    {link.name}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="relative hidden lg:block">
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none absolute left-0 top-0 rounded-full ${
+                solid ? 'bg-brand-50' : 'bg-white/10'
+              } ${pill ? 'opacity-100' : 'opacity-0'}`}
+              style={
+                pill
+                  ? {
+                      width: pill.width,
+                      height: pill.height,
+                      transform: `translate(${pill.x}px, ${pill.y}px)`,
+                      transition: pill.animate
+                        ? `transform 420ms ${EASE}, width 420ms ${EASE}, background-color 300ms ease`
+                        : 'background-color 300ms ease',
+                    }
+                  : undefined
+              }
+            />
+
+            <ul className="flex items-center gap-1">
+              {navLinks.map((link) => {
+                const id = link.href.slice(1);
+                const isActive = active === id;
+                return (
+                  <li key={link.name}>
+                    <a
+                      ref={(node) => {
+                        if (node) linkRefs.current.set(id, node);
+                        else linkRefs.current.delete(id);
+                      }}
+                      href={link.href}
+                      aria-current={isActive ? 'true' : undefined}
+                      className={`relative rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ${
+                        solid
+                          ? isActive
+                            ? 'text-brand-600'
+                            : 'text-ink-600 hover:text-ink-950'
+                          : isActive
+                            ? 'text-white'
+                            : 'text-white/65 hover:text-white'
+                      }`}
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
           <div className="flex items-center gap-2">
             {/* O wrapper controla a visibilidade: o `inline-flex` do próprio botão
                 venceria um `hidden` aplicado nele mesmo. */}
             <span className="hidden sm:block">
-              <CtaButton size="md" variant={solid ? "primary" : "outline-light"}>
+              <CtaButton size="md" variant={solid ? 'primary' : 'outline-light'}>
                 Orçamento
               </CtaButton>
             </span>
 
             <button
               type="button"
-              onClick={() => setIsOpen((open) => !open)}
+              onClick={toggleMenu}
               aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
               aria-expanded={isOpen}
               className={`flex size-11 items-center justify-center rounded-full border transition-colors lg:hidden ${
@@ -131,63 +206,62 @@ export default function Navbar() {
         </nav>
       </header>
 
-      {/* Menu mobile em tela cheia */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40 bg-ink-950 lg:hidden"
-          >
-            <div className="bg-grid absolute inset-0 opacity-60" />
-            <div className="absolute -right-24 top-1/4 size-80 rounded-full bg-brand-600/25 blur-3xl" />
+      {/* Menu mobile em tela cheia — sempre montado, aparece e some com transição CSS */}
+      <div
+        inert={!isOpen}
+        onTransitionEnd={(event) => {
+          if (event.target === event.currentTarget && event.propertyName === 'opacity' && !isOpen) {
+            setMenuEntered(false);
+          }
+        }}
+        className={`fixed inset-0 z-40 bg-ink-950 transition-[opacity,visibility] duration-250 lg:hidden ${
+          isOpen ? 'visible opacity-100' : 'invisible opacity-0'
+        }`}
+      >
+        <div className="bg-grid absolute inset-0 opacity-60" />
+        <div className="glow absolute -right-24 top-1/4 size-80 text-brand-600/20 [--glow-spread:6rem]" />
 
-            <div className="relative flex h-full flex-col justify-between px-6 pb-10 pt-28">
-              <ul className="space-y-1">
-                {navLinks.map((link, index) => (
-                  <motion.li
-                    key={link.name}
-                    initial={{ opacity: 0, x: -24 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.06 * index + 0.08, duration: 0.4 }}
-                  >
-                    <a
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-baseline gap-4 border-b border-white/10 py-4 font-display text-3xl font-bold text-white transition-colors hover:text-brand-300"
-                    >
-                      <span className="text-xs font-medium text-brand-400">
-                        0{index + 1}
-                      </span>
-                      {link.name}
-                    </a>
-                  </motion.li>
-                ))}
-              </ul>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.42, duration: 0.4 }}
-                className="space-y-4"
+        <div className="relative flex h-full flex-col justify-between px-6 pb-10 pt-28">
+          <ul className="space-y-1">
+            {navLinks.map((link, index) => (
+              <li
+                key={link.name}
+                className={`transition-[opacity,translate] duration-400 ease-out ${
+                  menuEntered ? 'translate-x-0 opacity-100' : '-translate-x-6 opacity-0'
+                }`}
+                style={{ transitionDelay: menuEntered ? `${0.06 * index + 0.08}s` : '0s' }}
               >
-                <CtaButton className="w-full">Solicitar orçamento</CtaButton>
                 <a
-                  href={whatsappLink()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 text-sm text-white/60"
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-baseline gap-4 border-b border-white/10 py-4 font-display text-3xl font-bold text-white transition-colors hover:text-brand-300"
                 >
-                  <WhatsappIcon className="size-4" />
-                  {site.phoneDisplay}
+                  <span className="text-xs font-medium text-brand-400">0{index + 1}</span>
+                  {link.name}
                 </a>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </li>
+            ))}
+          </ul>
+
+          <div
+            className={`space-y-4 transition-[opacity,translate] duration-400 ease-out ${
+              menuEntered ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'
+            }`}
+            style={{ transitionDelay: menuEntered ? '0.42s' : '0s' }}
+          >
+            <CtaButton className="w-full">Solicitar orçamento</CtaButton>
+            <a
+              href={whatsappLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 text-sm text-white/60"
+            >
+              <WhatsappIcon className="size-4" />
+              {site.phoneDisplay}
+            </a>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

@@ -27,7 +27,6 @@ export default function Hero() {
             alt=""
             fill
             sizes="100vw"
-            quality={90}
             preload
             className="object-cover object-[72%_center] brightness-110 contrast-105 md:object-bottom"
           />
@@ -40,7 +39,7 @@ export default function Hero() {
         <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-ink-950/55 to-transparent" />
 
         {/* O azul da marca entra como brilho, não como filtro por cima da foto */}
-        <div className="absolute -bottom-48 left-[8%] h-[26rem] w-[44rem] rounded-full bg-brand-600/25 blur-[150px]" />
+        <div className="glow absolute -bottom-48 left-[8%] h-[26rem] w-[44rem] text-brand-600/20 [--glow-spread:14rem]" />
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">

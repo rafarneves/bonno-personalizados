@@ -60,8 +60,8 @@ export default function Modelos() {
       className="grain relative overflow-hidden bg-ink-950 py-20 md:py-28"
     >
       <div className="bg-grid absolute inset-0 opacity-70" />
-      <div className="absolute -left-40 top-20 size-96 rounded-full bg-brand-600/20 blur-[120px]" />
-      <div className="absolute -right-40 bottom-0 size-96 rounded-full bg-brand-500/15 blur-[120px]" />
+      <div className="glow absolute -left-40 top-20 size-96 text-brand-600/16 [--glow-spread:11rem]" />
+      <div className="glow absolute -right-40 bottom-0 size-96 text-brand-500/12 [--glow-spread:11rem]" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
