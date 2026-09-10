@@ -15,7 +15,7 @@ function Track() {
       {words.map((word) => (
         <li
           key={word}
-          className="flex items-center gap-10 font-display text-xl font-extrabold uppercase tracking-tight text-white sm:text-2xl"
+          className="flex items-center gap-10 font-display text-xl font-extrabold uppercase leading-none tracking-tight text-white sm:text-2xl"
         >
           {word}
           <svg viewBox="0 0 24 24" className="size-4 shrink-0 fill-white/60">
@@ -34,7 +34,7 @@ export default function Marquee() {
       <p className="sr-only">
         A Bonno produz bonés personalizados para {words.join(', ')}.
       </p>
-      <div className="flex w-max -rotate-[0.6deg] animate-marquee">
+      <div className="flex w-max items-center animate-marquee">
         <Track />
         <Track />
       </div>
