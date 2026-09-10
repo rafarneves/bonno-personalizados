@@ -88,9 +88,9 @@ body {
 /* Malha quadriculada sutil para as seções escuras */
 .bg-grid {
   background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
-  background-size: 64px 64px;
+    linear-gradient(to right, rgb(255 255 255 / 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.028) 1px, transparent 1px);
+  background-size: 88px 88px;
 }
 
 /* A mesma malha, em azul, para as seções claras */
@@ -112,9 +112,10 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Esmaece a borda de um elemento decorativo até sumir */
-.mask-fade-x {
-  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+/* Dissolve a borda de cima de uma imagem, para ela não terminar em linha reta */
+.mask-fade-top {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 26%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 26%);
 }
 
 /* ---------- Carrosséis (Swiper) ---------- */
