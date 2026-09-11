@@ -509,13 +509,9 @@ export function placeDecal(
   // Convenção do DecalGeometry (three-stdlib):
   //   UV = (0.5 + x/size.x,  0.5 + y/size.y)
   // onde (x, y) são coordenadas no espaço local do projetor.
-  // Para que o texto apareça legível, o eixo X local precisa apontar para a
-  // DIREITA do leitor, e o eixo Y local precisa apontar para BAIXO (já que V
-  // cresce para baixo como coordenadas de canvas, onde Y=0 é o topo).
-  //
-  // A convenção original do <Decal> da drei (lookAt + rotateZ(π) + rotateY(π))
-  // produz exatamente isso: X = right, Y = -up, Z = +normal.
-  // Reproduzimos o mesmo resultado via base ortonormal explícita.
+  // Como as texturas de canvas no Three.js por padrão têm flipY=true,
+  // V=1 corresponde ao TOPO da imagem. Para que o texto fique com a
+  // orientação correta, o eixo Y local precisa apontar para CIMA.
 
   const normal = frame.normal.clone().normalize();
 
@@ -529,12 +525,11 @@ export function placeDecal(
   }
   tangentRight.normalize();
 
-  // tangentDown = normal × tangentRight  (aponta para BAIXO no espaço da textura)
-  // É o oposto do "para cima" corrigido; isso casa com a convenção de UV do DecalGeometry.
-  const tangentDown = new THREE.Vector3().crossVectors(normal, tangentRight).negate();
+  // tangentUp = normal × tangentRight  (aponta para CIMA no espaço do boné)
+  const tangentUp = new THREE.Vector3().crossVectors(normal, tangentRight);
 
-  // Matriz de rotação: colunas = (tangentRight, tangentDown, normal)
-  const matrix = new THREE.Matrix4().makeBasis(tangentRight, tangentDown, normal);
+  // Matriz de rotação: colunas = (tangentRight, tangentUp, normal)
+  const matrix = new THREE.Matrix4().makeBasis(tangentRight, tangentUp, normal);
 
   // Aplica a rotação do usuário em torno da normal (eixo Z local)
   if (rotationDeg !== 0) {

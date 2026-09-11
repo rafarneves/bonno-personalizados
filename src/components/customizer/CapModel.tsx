@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Decal } from '@react-three/drei';
 import { type ThreeEvent, useThree } from '@react-three/fiber';
@@ -182,6 +182,7 @@ function LayerDecal({ layer, model, selected }: { layer: Layer; model: CapModelS
 export default function CapModel({ design, selectedId, onPlace }: CapModelProps) {
   const model = MODELS[design.model];
   const gl = useThree((state) => state.gl);
+  const controls = useThree((state) => state.controls) as { enabled: boolean } | null;
   const materials = useMaterials(design.colors, model.crown?.meshBack ?? false);
 
   const crown = useMemo(() => (model.crown ? buildCrown(model.crown) : null), [model]);
@@ -197,24 +198,61 @@ export default function CapModel({ design, selectedId, onPlace }: CapModelProps)
     [crown, bill, band]
   );
 
-  const handleClick = (surface: SurfaceId) => (event: ThreeEvent<MouseEvent>) => {
-    // Ignora o clique que na verdade foi o fim de um arraste para girar
-    if (!selectedId || event.delta > 6) return;
-    event.stopPropagation();
+  // --- Arrastar para reposicionar ---
+  // Quando o cliente arrasta o boné com uma arte selecionada, a arte acompanha
+  // o ponteiro em vez de girar a câmera.
+  const dragSurface = useRef<SurfaceId | null>(null);
+
+  const placeFromEvent = (surface: SurfaceId, event: ThreeEvent<PointerEvent | MouseEvent>) => {
+    if (!selectedId) return;
     const local = event.eventObject.worldToLocal(event.point.clone());
     const { u, v } = paramsFromPoint(model, surface, local);
     onPlace(selectedId, surface, u, v);
   };
+
+  const handlePointerDown = (surface: SurfaceId) => (event: ThreeEvent<PointerEvent>) => {
+    if (!selectedId) return;
+    event.stopPropagation();
+    dragSurface.current = surface;
+    if (controls) controls.enabled = false;
+    placeFromEvent(surface, event);
+  };
+
+  const handlePointerMove = (surface: SurfaceId) => (event: ThreeEvent<PointerEvent>) => {
+    if (dragSurface.current !== surface) return;
+    event.stopPropagation();
+    placeFromEvent(surface, event);
+  };
+
+  // Listener global no canvas para capturar pointerUp mesmo fora da mesh
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const handleUp = () => {
+      if (dragSurface.current) {
+        dragSurface.current = null;
+        if (controls) controls.enabled = true;
+      }
+    };
+    canvas.addEventListener('pointerup', handleUp);
+    canvas.addEventListener('pointerleave', handleUp);
+    return () => {
+      canvas.removeEventListener('pointerup', handleUp);
+      canvas.removeEventListener('pointerleave', handleUp);
+    };
+  }, [gl, controls]);
 
   // O cursor é trocado no próprio canvas que recebeu o evento
   const setCursor = (event: ThreeEvent<PointerEvent>, cursor: string) => {
     const canvas = event.nativeEvent.target;
     if (canvas instanceof HTMLElement) canvas.style.cursor = cursor;
   };
-  const pointer = {
+
+  const surfaceHandlers = (surface: SurfaceId) => ({
+    onPointerDown: handlePointerDown(surface),
+    onPointerMove: handlePointerMove(surface),
     onPointerOver: (event: ThreeEvent<PointerEvent>) => setCursor(event, selectedId ? 'crosshair' : 'grab'),
     onPointerOut: (event: ThreeEvent<PointerEvent>) => setCursor(event, ''),
-  };
+  });
 
   const decals = (surface: SurfaceId) =>
     design.layers
@@ -232,7 +270,7 @@ export default function CapModel({ design, selectedId, onPlace }: CapModelProps)
     <group>
       {crown && (
         <>
-          <mesh geometry={crown.shell} material={[materials.front, materials.sides]} onClick={handleClick('copa')} {...pointer}>
+          <mesh geometry={crown.shell} material={[materials.front, materials.sides]} {...surfaceHandlers('copa')}>
             {decals('copa')}
           </mesh>
           <mesh geometry={crown.shell} material={materials.lining} scale={0.992} />
@@ -244,7 +282,7 @@ export default function CapModel({ design, selectedId, onPlace }: CapModelProps)
 
       {band && (
         <>
-          <mesh geometry={band.band} material={materials.front} onClick={handleClick('faixa')} {...pointer}>
+          <mesh geometry={band.band} material={materials.front} {...surfaceHandlers('faixa')}>
             {decals('faixa')}
           </mesh>
           <mesh geometry={band.band} material={materials.lining} scale={0.99} />
@@ -253,7 +291,7 @@ export default function CapModel({ design, selectedId, onPlace }: CapModelProps)
         </>
       )}
 
-      <mesh geometry={bill.top} material={materials.bill} onClick={handleClick('aba')} {...pointer}>
+      <mesh geometry={bill.top} material={materials.bill} {...surfaceHandlers('aba')}>
         {decals('aba')}
       </mesh>
       <mesh geometry={bill.under} material={materials.bill} />
@@ -261,3 +299,4 @@ export default function CapModel({ design, selectedId, onPlace }: CapModelProps)
     </group>
   );
 }
+

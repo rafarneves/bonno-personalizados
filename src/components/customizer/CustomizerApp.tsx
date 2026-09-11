@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, LoaderCircle, Rotate3d } from 'lucide-react';
+import { ArrowLeft, LoaderCircle, Move, Rotate3d } from 'lucide-react';
 import Logo from '../Logo';
 import { WhatsappIcon } from '../icons';
 import CustomizerPanel from './CustomizerPanel';
@@ -303,8 +303,17 @@ export default function CustomizerApp() {
             {model.name}
           </span>
           <span className="pointer-events-none absolute right-4 top-4 hidden items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs text-ink-500 shadow-card sm:flex">
-            <Rotate3d className="size-3.5" />
-            Arraste para girar
+            {selectedId ? (
+              <>
+                <Move className="size-3.5" />
+                Arraste para posicionar
+              </>
+            ) : (
+              <>
+                <Rotate3d className="size-3.5" />
+                Arraste para girar
+              </>
+            )}
           </span>
 
           <div className="absolute inset-x-0 bottom-3 flex justify-center px-3">
